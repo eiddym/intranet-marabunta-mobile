@@ -170,5 +170,49 @@ class IntranetApi {
         .map((e) => IntranetNotice.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
+  Future<String> createMobileSession() async {
+    var token = await _auth.getValidAccessToken();
+    if (token == null) {
+      throw const UnauthorizedException();
+    }
+
+    final uri = Uri.parse('${AuthConfig.apiBaseUrl}/api/auth/mobile-session');
+    var response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 401) {
+      final refreshed = await _auth.refreshAccessToken();
+      if (refreshed == null) {
+        throw const UnauthorizedException();
+      }
+      response = await http.post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $refreshed',
+          'Accept': 'application/json',
+        },
+      );
+      if (response.statusCode == 401) {
+        throw const UnauthorizedException();
+      }
+    }
+
+    if (response.statusCode != 200) {
+      throw Exception('Error al iniciar sesión web (${response.statusCode})');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final sessionId = (data['session_id'] ?? '').toString();
+    if (sessionId.isEmpty) {
+      throw Exception('Respuesta inválida de sesión móvil');
+    }
+    return sessionId;
+  }
 }
 
