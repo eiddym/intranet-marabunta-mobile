@@ -17,7 +17,6 @@ class AuthService {
         AuthConfig.redirectUri,
         discoveryUrl: AuthConfig.discoveryUrl,
         scopes: AuthConfig.scopes,
-        preferEphemeralSession: false,
       ),
     );
 
