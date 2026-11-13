@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_appauth/flutter_appauth.dart';
 import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -72,6 +73,9 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         setState(() => _error = 'Autenticación cancelada o incompleta.');
       }
+    } on FlutterAppAuthUserCancelledException {
+      if (!mounted) return;
+      setState(() => _error = 'Inicio de sesión cancelado.');
     } catch (e) {
       if (!mounted) return;
       setState(() => _error = 'Error al conectar con Marabunta ID: $e');
